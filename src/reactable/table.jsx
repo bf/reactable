@@ -506,7 +506,7 @@ export class Table extends React.Component {
             <tbody className="reactable-data" key="tbody">
                 {currentChildren.length > 0 ? currentChildren : noDataText}
             </tbody>
-            {pagination === true ?
+            { (pagination === true && numPages > 1) ?
              <Paginator colSpan={columns.length}
                  pageButtonLimit={pageButtonLimit}
                  numPages={numPages}
