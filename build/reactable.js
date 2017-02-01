@@ -1424,7 +1424,7 @@ window.ReactDOM["default"] = window.ReactDOM;
                 // http://www.mattzabriskie.com/blog/react-referencing-dynamic-children
                 var index = 0;
                 var children = _react['default'].Children.map(this.props.children, function (child) {
-                    return _react['default'].addons.cloneWithProps(child, { ref: 'child-' + index++ });
+                    return _react['default'].cloneElement(child, { ref: 'child-' + index++ });
                 });
 
                 return _react['default'].createElement(
