@@ -381,7 +381,7 @@ export class Table extends React.Component {
         // http://www.mattzabriskie.com/blog/react-referencing-dynamic-children
         let index = 0;
         let children = React.Children.map(this.props.children, function (child) {
-          return React.addons.cloneWithProps(child, {ref: 'child-' + (index++) });
+          return React.cloneElement(child, {ref: 'child-' + (index++) });
         });
 
         return <div>{children}</div>;
