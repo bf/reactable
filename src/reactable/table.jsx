@@ -62,6 +62,7 @@ export class Table extends React.Component {
                     return;
                 }
 
+<<<<<<< HEAD
                 let reactableDescendant;
                 let test;
 
@@ -73,6 +74,9 @@ export class Table extends React.Component {
                 }
 
                 switch (reactableDescendant.type) {
+=======
+                switch (child.type) {
+>>>>>>> parent of 7a937ca... Allow specifying table rows in custom components
                     case Tfoot:
                         if (typeof(tfoot) !== 'undefined') {
                             console.warn ('You can only have one <Tfoot>, but more than one was specified.' +
@@ -81,9 +85,9 @@ export class Table extends React.Component {
                         tfoot = child;
                     break;
                     case Tr:
-                        let childData = reactableDescendant.props.data || {};
+                        let childData = child.props.data || {};
 
-                        React.Children.forEach(reactableDescendant.props.children, function(descendant) {
+                        React.Children.forEach(child.props.children, function(descendant) {
                             // TODO
                             /* if (descendant.type.ConvenienceConstructor === Td) { */
                             if (
@@ -99,7 +103,7 @@ export class Table extends React.Component {
                                 } else if (typeof(descendant.props.children) !== 'undefined') {
                                     value = descendant.props.children;
                                 } else {
-                                    console.warn('Td specified without ' +
+                                    console.warn('exports.Td specified without ' +
                                                  'a `data` property or children, ' +
                                                  'ignoring');
                                     return;
@@ -118,7 +122,7 @@ export class Table extends React.Component {
 
                         data.push({
                             data: childData,
-                            props: filterPropsFrom(reactableDescendant.props),
+                            props: filterPropsFrom(child.props),
                             __reactableMeta: true
                         });
                     break;

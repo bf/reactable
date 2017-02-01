@@ -1046,6 +1046,7 @@ window.React["default"] = window.React;
                             return;
                         }
 
+<<<<<<< HEAD
                         var reactableDescendant = undefined;
                         var test = undefined;
 
@@ -1057,6 +1058,9 @@ window.React["default"] = window.React;
                         }
 
                         switch (reactableDescendant.type) {
+=======
+                        switch (child.type) {
+>>>>>>> parent of 7a937ca... Allow specifying table rows in custom components
                             case _tfoot.Tfoot:
                                 if (typeof tfoot !== 'undefined') {
                                     console.warn('You can only have one <Tfoot>, but more than one was specified.' + 'Ignoring all but the last one');
@@ -1064,9 +1068,9 @@ window.React["default"] = window.React;
                                 tfoot = child;
                                 break;
                             case _tr.Tr:
-                                var childData = reactableDescendant.props.data || {};
+                                var childData = child.props.data || {};
 
-                                _react['default'].Children.forEach(reactableDescendant.props.children, function (descendant) {
+                                _react['default'].Children.forEach(child.props.children, function (descendant) {
                                     // TODO
                                     /* if (descendant.type.ConvenienceConstructor === Td) { */
                                     if (typeof descendant !== 'object' || descendant == null) {
@@ -1079,7 +1083,7 @@ window.React["default"] = window.React;
                                         } else if (typeof descendant.props.children !== 'undefined') {
                                             value = descendant.props.children;
                                         } else {
-                                            console.warn('Td specified without ' + 'a `data` property or children, ' + 'ignoring');
+                                            console.warn('exports.Td specified without ' + 'a `data` property or children, ' + 'ignoring');
                                             return;
                                         }
 
@@ -1095,7 +1099,7 @@ window.React["default"] = window.React;
 
                                 data.push({
                                     data: childData,
-                                    props: (0, _libFilter_props_from.filterPropsFrom)(reactableDescendant.props),
+                                    props: (0, _libFilter_props_from.filterPropsFrom)(child.props),
                                     __reactableMeta: true
                                 });
                                 break;

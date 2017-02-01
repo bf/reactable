@@ -611,6 +611,7 @@
         });
 
         describe('adding <CustomComponents>s to the <Table>', function () {
+<<<<<<< HEAD
             context('passing through props', function () {
                 before(function () {
                     var CustomComponent = React.createClass({
@@ -653,6 +654,46 @@
                 });
 
                 after(ReactableTestUtils.resetTestEnvironment);
+=======
+            before(function () {
+                var CustomComponent = React.createClass({
+                    displayName: "CustomComponent",
+                    propTypes: {
+                        name: React.PropTypes.string,
+                        age: React.PropTypes.number,
+                        position: React.PropTypes.string
+                    },
+                    render: function render() {
+                        return React.createElement(
+                            Reactable.Tr,
+                            null,
+                            React.createElement(
+                                Reactable.Td,
+                                { column: 'Name' },
+                                this.props.name
+                            ),
+                            React.createElement(
+                                Reactable.Td,
+                                { column: 'Age' },
+                                this.props.age
+                            ),
+                            React.createElement(
+                                Reactable.Td,
+                                { column: 'Position' },
+                                this.props.position
+                            )
+                        );
+                    }
+                });
+                React.render(React.createElement(
+                    Reactable.Table,
+                    { className: 'table', id: 'table' },
+                    React.createElement(CustomComponent, { name: 'Griffin Smith', age: 18 }),
+                    React.createElement(CustomComponent, { name: 'Lee Salminen', age: 23 }),
+                    React.createElement(CustomComponent, { age: 28, position: 'Developer' })
+                ), ReactableTestUtils.testNode());
+            });
+>>>>>>> parent of 7a937ca... Allow specifying table rows in custom components
 
                 it('renders the table', function () {
                     expect($('table#table.table')).to.exist;

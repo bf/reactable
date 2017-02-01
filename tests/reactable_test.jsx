@@ -418,6 +418,7 @@ describe('Reactable', function() {
     });
 
     describe('adding <CustomComponents>s to the <Table>', function() {
+<<<<<<< HEAD
         context('passing through props', function() {
             before(function() {
                 var CustomComponent = React.createClass({
@@ -449,6 +450,35 @@ describe('Reactable', function() {
             });
 
             after(ReactableTestUtils.resetTestEnvironment);
+=======
+        before(function() {
+            var CustomComponent = React.createClass({
+                displayName: "CustomComponent",
+                propTypes:{
+                    name: React.PropTypes.string,
+                    age: React.PropTypes.number,
+                    position: React.PropTypes.string
+                },
+                render: function(){
+                    return (
+                      <Reactable.Tr>
+                          <Reactable.Td column="Name">{this.props.name}</Reactable.Td>
+                          <Reactable.Td column="Age">{this.props.age}</Reactable.Td>
+                          <Reactable.Td column="Position">{this.props.position}</Reactable.Td>
+                      </Reactable.Tr>
+                    );
+                }
+            });
+            React.render(
+                <Reactable.Table className="table" id="table">
+                    <CustomComponent name='Griffin Smith' age={18} />
+                    <CustomComponent name='Lee Salminen' age={23} />
+                    <CustomComponent age={28} position='Developer' />
+                </Reactable.Table>,
+                ReactableTestUtils.testNode()
+            );
+        });
+>>>>>>> parent of 7a937ca... Allow specifying table rows in custom components
 
             it('renders the table', function() {
                 expect($('table#table.table')).to.exist;
