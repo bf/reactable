@@ -418,39 +418,6 @@ describe('Reactable', function() {
     });
 
     describe('adding <CustomComponents>s to the <Table>', function() {
-<<<<<<< HEAD
-        context('passing through props', function() {
-            before(function() {
-                var CustomComponent = React.createClass({
-                    displayName: "CustomComponent",
-                    propTypes:{
-                        name: React.PropTypes.string,
-                        age: React.PropTypes.number,
-                        position: React.PropTypes.string
-                    },
-                    render: function(){
-                        return (
-                          <Reactable.Tr>
-                              <Reactable.Td column="Name">{this.props.name || ''}</Reactable.Td>
-                              <Reactable.Td column="Age">{this.props.age || ''}</Reactable.Td>
-                              <Reactable.Td column="Position">{this.props.position || ''}</Reactable.Td>
-                          </Reactable.Tr>
-                        );
-                    }
-                });
-
-                React.render(
-                    <Reactable.Table className="table" id="table">
-                        <CustomComponent name='Griffin Smith' age={18} />
-                        <CustomComponent name='Lee Salminen' age={23} />
-                        <CustomComponent age={28} position='Developer' />
-                    </Reactable.Table>,
-                    ReactableTestUtils.testNode()
-                );
-            });
-
-            after(ReactableTestUtils.resetTestEnvironment);
-=======
         before(function() {
             var CustomComponent = React.createClass({
                 displayName: "CustomComponent",
@@ -458,6 +425,13 @@ describe('Reactable', function() {
                     name: React.PropTypes.string,
                     age: React.PropTypes.number,
                     position: React.PropTypes.string
+                },
+                getData: function(){
+                    return {
+                        Name: this.props.name,
+                        Age: this.props.age,
+                        Position: this.props.position,
+                    }
                 },
                 render: function(){
                     return (
@@ -478,81 +452,32 @@ describe('Reactable', function() {
                 ReactableTestUtils.testNode()
             );
         });
->>>>>>> parent of 7a937ca... Allow specifying table rows in custom components
 
-            it('renders the table', function() {
-                expect($('table#table.table')).to.exist;
-            });
+        after(ReactableTestUtils.resetTestEnvironment);
 
-            it('renders the column headers in the table', function() {
-                var headers = [];
-                $('thead th').each(function() {
-                    headers.push($(this).text());
-                });
-
-                expect(headers).to.eql([ 'Name', 'Age', 'Position' ]);
-            });
-
-            it('renders the first row with the correct data', function() {
-                ReactableTestUtils.expectRowText(0, ['Griffin Smith', '18', '']);
-            });
-
-            it('renders the second row with the correct data', function() {
-                ReactableTestUtils.expectRowText(1, ['Lee Salminen', '23', '']);
-            });
-
-            it('renders the third row with the correct data', function() {
-                ReactableTestUtils.expectRowText(2, ['', '28', 'Developer']);
-            });
+        it('renders the table', function() {
+            expect($('table#table.table')).to.exist;
         });
 
-        context('passing through context', function() {
-            before(function() {
-                let RowComponent = React.createClass({
-                    displayName: 'CustomComponent',
-                    contextTypes: { test: React.PropTypes.string },
-                    render: function(){
-                        return (
-                          <Reactable.Tr>
-                              <Reactable.Td column="Name">{this.props.name || ''}</Reactable.Td>
-                              <Reactable.Td column="Test">{this.context.test || ''}</Reactable.Td>
-                          </Reactable.Tr>
-                        );
-                    }
-                });
-
-                let TableComponent = React.createClass({
-                    displayName: 'TableComponent',
-                    childContextTypes: { test: React.PropTypes.string },
-                    getChildContext: function() {
-                        return { test: 'foobar' };
-                    },
-                    render: function() {
-                        return (
-                            <Reactable.Table className="table" id="table">
-                                <RowComponent name='Griffin Smith' />
-                                <RowComponent name='Lee Salminen' />
-                            </Reactable.Table>
-                        );
-                    }
-                });
-
-                React.render(<TableComponent/>, ReactableTestUtils.testNode());
+        it('renders the column headers in the table', function() {
+            var headers = [];
+            $('thead th').each(function() {
+                headers.push($(this).text());
             });
 
-            after(ReactableTestUtils.resetTestEnvironment);
+            expect(headers).to.eql([ 'Name', 'Age', 'Position' ]);
+        });
 
-            it('renders the table', function() {
-                expect($('table#table.table')).to.exist;
-            });
+        it('renders the first row with the correct data', function() {
+            ReactableTestUtils.expectRowText(0, ['Griffin Smith', '18', '']);
+        });
 
-            it('renders the first row with the correct data', function() {
-                ReactableTestUtils.expectRowText(0, ['Griffin Smith', 'foobar']);
-            });
+        it('renders the second row with the correct data', function() {
+            ReactableTestUtils.expectRowText(1, ['Lee Salminen', '23', '']);
+        });
 
-            it('renders the second row with the correct data', function() {
-                ReactableTestUtils.expectRowText(1, ['Lee Salminen', 'foobar']);
-            });
+        it('renders the third row with the correct data', function() {
+            ReactableTestUtils.expectRowText(2, ['', '28', 'Developer']);
         });
     });
 

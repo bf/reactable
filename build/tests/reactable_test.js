@@ -611,50 +611,6 @@
         });
 
         describe('adding <CustomComponents>s to the <Table>', function () {
-<<<<<<< HEAD
-            context('passing through props', function () {
-                before(function () {
-                    var CustomComponent = React.createClass({
-                        displayName: "CustomComponent",
-                        propTypes: {
-                            name: React.PropTypes.string,
-                            age: React.PropTypes.number,
-                            position: React.PropTypes.string
-                        },
-                        render: function render() {
-                            return React.createElement(
-                                Reactable.Tr,
-                                null,
-                                React.createElement(
-                                    Reactable.Td,
-                                    { column: 'Name' },
-                                    this.props.name || ''
-                                ),
-                                React.createElement(
-                                    Reactable.Td,
-                                    { column: 'Age' },
-                                    this.props.age || ''
-                                ),
-                                React.createElement(
-                                    Reactable.Td,
-                                    { column: 'Position' },
-                                    this.props.position || ''
-                                )
-                            );
-                        }
-                    });
-
-                    React.render(React.createElement(
-                        Reactable.Table,
-                        { className: 'table', id: 'table' },
-                        React.createElement(CustomComponent, { name: 'Griffin Smith', age: 18 }),
-                        React.createElement(CustomComponent, { name: 'Lee Salminen', age: 23 }),
-                        React.createElement(CustomComponent, { age: 28, position: 'Developer' })
-                    ), ReactableTestUtils.testNode());
-                });
-
-                after(ReactableTestUtils.resetTestEnvironment);
-=======
             before(function () {
                 var CustomComponent = React.createClass({
                     displayName: "CustomComponent",
@@ -662,6 +618,13 @@
                         name: React.PropTypes.string,
                         age: React.PropTypes.number,
                         position: React.PropTypes.string
+                    },
+                    getData: function getData() {
+                        return {
+                            Name: this.props.name,
+                            Age: this.props.age,
+                            Position: this.props.position
+                        };
                     },
                     render: function render() {
                         return React.createElement(
@@ -693,89 +656,32 @@
                     React.createElement(CustomComponent, { age: 28, position: 'Developer' })
                 ), ReactableTestUtils.testNode());
             });
->>>>>>> parent of 7a937ca... Allow specifying table rows in custom components
 
-                it('renders the table', function () {
-                    expect($('table#table.table')).to.exist;
-                });
+            after(ReactableTestUtils.resetTestEnvironment);
 
-                it('renders the column headers in the table', function () {
-                    var headers = [];
-                    $('thead th').each(function () {
-                        headers.push($(this).text());
-                    });
-
-                    expect(headers).to.eql(['Name', 'Age', 'Position']);
-                });
-
-                it('renders the first row with the correct data', function () {
-                    ReactableTestUtils.expectRowText(0, ['Griffin Smith', '18', '']);
-                });
-
-                it('renders the second row with the correct data', function () {
-                    ReactableTestUtils.expectRowText(1, ['Lee Salminen', '23', '']);
-                });
-
-                it('renders the third row with the correct data', function () {
-                    ReactableTestUtils.expectRowText(2, ['', '28', 'Developer']);
-                });
+            it('renders the table', function () {
+                expect($('table#table.table')).to.exist;
             });
 
-            context('passing through context', function () {
-                before(function () {
-                    var RowComponent = React.createClass({
-                        displayName: 'CustomComponent',
-                        contextTypes: { test: React.PropTypes.string },
-                        render: function render() {
-                            return React.createElement(
-                                Reactable.Tr,
-                                null,
-                                React.createElement(
-                                    Reactable.Td,
-                                    { column: 'Name' },
-                                    this.props.name || ''
-                                ),
-                                React.createElement(
-                                    Reactable.Td,
-                                    { column: 'Test' },
-                                    this.context.test || ''
-                                )
-                            );
-                        }
-                    });
-
-                    var TableComponent = React.createClass({
-                        displayName: 'TableComponent',
-                        childContextTypes: { test: React.PropTypes.string },
-                        getChildContext: function getChildContext() {
-                            return { test: 'foobar' };
-                        },
-                        render: function render() {
-                            return React.createElement(
-                                Reactable.Table,
-                                { className: 'table', id: 'table' },
-                                React.createElement(RowComponent, { name: 'Griffin Smith' }),
-                                React.createElement(RowComponent, { name: 'Lee Salminen' })
-                            );
-                        }
-                    });
-
-                    React.render(React.createElement(TableComponent, null), ReactableTestUtils.testNode());
+            it('renders the column headers in the table', function () {
+                var headers = [];
+                $('thead th').each(function () {
+                    headers.push($(this).text());
                 });
 
-                after(ReactableTestUtils.resetTestEnvironment);
+                expect(headers).to.eql(['Name', 'Age', 'Position']);
+            });
 
-                it('renders the table', function () {
-                    expect($('table#table.table')).to.exist;
-                });
+            it('renders the first row with the correct data', function () {
+                ReactableTestUtils.expectRowText(0, ['Griffin Smith', '18', '']);
+            });
 
-                it('renders the first row with the correct data', function () {
-                    ReactableTestUtils.expectRowText(0, ['Griffin Smith', 'foobar']);
-                });
+            it('renders the second row with the correct data', function () {
+                ReactableTestUtils.expectRowText(1, ['Lee Salminen', '23', '']);
+            });
 
-                it('renders the second row with the correct data', function () {
-                    ReactableTestUtils.expectRowText(1, ['Lee Salminen', 'foobar']);
-                });
+            it('renders the third row with the correct data', function () {
+                ReactableTestUtils.expectRowText(2, ['', '28', 'Developer']);
             });
         });
 
