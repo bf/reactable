@@ -1039,7 +1039,8 @@ window.ReactDOM["default"] = window.ReactDOM;
             _get(Object.getPrototypeOf(Table.prototype), 'constructor', this).call(this, props);
 
             this.state = {
-                currentPage: this.props.currentPage ? this.props.currentPage : 0,
+                parsedCustomComponents: false,
+                currentPage: 0,
                 currentSort: {
                     column: null,
                     direction: this.props.defaultSortDescending ? -1 : 1
@@ -1085,7 +1086,8 @@ window.ReactDOM["default"] = window.ReactDOM;
             key: 'parseChildData',
             value: function parseChildData(props) {
                 var data = [],
-                    tfoot = undefined;
+                    tfoot = undefined,
+                    customComponentsCount = 0;
 
                 // Transform any children back to a data array
                 if (typeof props.children !== 'undefined') {
@@ -1094,17 +1096,7 @@ window.ReactDOM["default"] = window.ReactDOM;
                             return;
                         }
 
-                        var reactableDescendant = undefined;
-                        var test = undefined;
-
-                        if ([_tfoot.Tfoot, _thead.Thead, _tr.Tr].indexOf(child.type) >= 0) {
-                            reactableDescendant = child;
-                        } else {
-                            reactableDescendant = new child.type(child.props, child._context).render();
-                            test = true;
-                        }
-
-                        switch (reactableDescendant.type) {
+                        switch (child.type) {
                             case _tfoot.Tfoot:
                                 if (typeof tfoot !== 'undefined') {
                                     console.warn('You can only have one <Tfoot>, but more than one was specified.' + 'Ignoring all but the last one');
@@ -1112,9 +1104,9 @@ window.ReactDOM["default"] = window.ReactDOM;
                                 tfoot = child;
                                 break;
                             case _tr.Tr:
-                                var childData = reactableDescendant.props.data || {};
+                                var childData = child.props.data || {};
 
-                                _react['default'].Children.forEach(reactableDescendant.props.children, function (descendant) {
+                                _react['default'].Children.forEach(child.props.children, function (descendant) {
                                     // TODO
                                     /* if (descendant.type.ConvenienceConstructor === Td) { */
                                     if (typeof descendant !== 'object' || descendant == null) {
@@ -1127,7 +1119,7 @@ window.ReactDOM["default"] = window.ReactDOM;
                                         } else if (typeof descendant.props.children !== 'undefined') {
                                             value = descendant.props.children;
                                         } else {
-                                            console.warn('Td specified without ' + 'a `data` property or children, ' + 'ignoring');
+                                            console.warn('exports.Td specified without ' + 'a `data` property or children, ' + 'ignoring');
                                             return;
                                         }
 
@@ -1143,18 +1135,22 @@ window.ReactDOM["default"] = window.ReactDOM;
 
                                 data.push({
                                     data: childData,
-                                    props: (0, _libFilter_props_from.filterPropsFrom)(reactableDescendant.props),
+                                    props: (0, _libFilter_props_from.filterPropsFrom)(child.props),
                                     __reactableMeta: true
                                 });
                                 break;
 
                             default:
-                                console.warn('The only possible children of <Table> are <Thead>, <Tr>, ' + 'or one <Tfoot>.');
+                                // Don't know if there are other acceptable types
+                                // that should be dismissed
+                                // console.log("Table, got custom component", child.type)
+                                customComponentsCount++;
+                                break;
                         }
                     }).bind(this));
                 }
 
-                return { data: data, tfoot: tfoot };
+                return { data: data, tfoot: tfoot, customComponentsCount: customComponentsCount };
             }
         }, {
             key: 'initialize',
@@ -1165,9 +1161,11 @@ window.ReactDOM["default"] = window.ReactDOM;
 
                 var data = _parseChildData.data;
                 var tfoot = _parseChildData.tfoot;
+                var customComponentsCount = _parseChildData.customComponentsCount;
 
                 this.data = this.data.concat(data);
                 this.tfoot = tfoot;
+                this.customComponentsCount = customComponentsCount;
 
                 this.initializeSorts(props);
                 this.initializeFilters(props);
@@ -1295,6 +1293,27 @@ window.ReactDOM["default"] = window.ReactDOM;
                 this.filterBy(this.props.filterBy);
             }
         }, {
+            key: 'componentDidMount',
+            value: function componentDidMount() {
+                for (var i = 0; i < this.customComponentsCount; i++) {
+                    var child = this.refs['child-' + i],
+                        childData = child.getData(),
+                        childDataToPush = {};
+                    for (var key in childData) {
+                        childDataToPush[key] = {
+                            value: childData[key],
+                            __reactableMeta: true
+                        };
+                    }
+                    this.data.push({
+                        data: childDataToPush,
+                        props: (0, _libFilter_props_from.filterPropsFrom)(child.props),
+                        __reactableMeta: true
+                    });
+                };
+                this.setState({ parsedCustomComponents: true });
+            }
+        }, {
             key: 'componentWillReceiveProps',
             value: function componentWillReceiveProps(nextProps) {
                 this.initialize(nextProps);
@@ -1400,9 +1419,28 @@ window.ReactDOM["default"] = window.ReactDOM;
                 }
             }
         }, {
+            key: 'renderUnparsedDataTable',
+            value: function renderUnparsedDataTable() {
+                // http://www.mattzabriskie.com/blog/react-referencing-dynamic-children
+                var index = 0;
+                var children = _react['default'].Children.map(this.props.children, function (child) {
+                    return _react['default'].addons.cloneWithProps(child, { ref: 'child-' + index++ });
+                });
+
+                return _react['default'].createElement(
+                    'div',
+                    null,
+                    children
+                );
+            }
+        }, {
             key: 'render',
             value: function render() {
                 var _this = this;
+
+                if (!this.state.parsedCustomComponents && this.customComponentsCount > 0) {
+                    return this.renderUnparsedDataTable();
+                }
 
                 var children = [];
                 var columns = undefined;

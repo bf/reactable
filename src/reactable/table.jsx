@@ -13,7 +13,8 @@ export class Table extends React.Component {
         super(props);
 
         this.state = {
-            currentPage: this.props.currentPage ? this.props.currentPage : 0,
+            parsedCustomComponents: false,
+            currentPage: 0,
             currentSort: {
                 column: null,
                 direction: this.props.defaultSortDescending ? -1 : 1
@@ -53,7 +54,7 @@ export class Table extends React.Component {
     }
 
     parseChildData(props) {
-        let data = [], tfoot;
+        let data = [], tfoot, customComponentsCount = 0;
 
         // Transform any children back to a data array
         if (typeof(props.children) !== 'undefined') {
@@ -62,17 +63,7 @@ export class Table extends React.Component {
                     return;
                 }
 
-                let reactableDescendant;
-                let test;
-
-                if ([Tfoot, Thead, Tr].indexOf(child.type) >= 0) {
-                    reactableDescendant = child
-                } else {
-                    reactableDescendant = (new child.type(child.props, child._context)).render()
-                    test = true
-                }
-
-                switch (reactableDescendant.type) {
+                switch (child.type) {
                     case Tfoot:
                         if (typeof(tfoot) !== 'undefined') {
                             console.warn ('You can only have one <Tfoot>, but more than one was specified.' +
@@ -81,9 +72,9 @@ export class Table extends React.Component {
                         tfoot = child;
                     break;
                     case Tr:
-                        let childData = reactableDescendant.props.data || {};
+                        let childData = child.props.data || {};
 
-                        React.Children.forEach(reactableDescendant.props.children, function(descendant) {
+                        React.Children.forEach(child.props.children, function(descendant) {
                             // TODO
                             /* if (descendant.type.ConvenienceConstructor === Td) { */
                             if (
@@ -99,7 +90,7 @@ export class Table extends React.Component {
                                 } else if (typeof(descendant.props.children) !== 'undefined') {
                                     value = descendant.props.children;
                                 } else {
-                                    console.warn('Td specified without ' +
+                                    console.warn('exports.Td specified without ' +
                                                  'a `data` property or children, ' +
                                                  'ignoring');
                                     return;
@@ -118,27 +109,31 @@ export class Table extends React.Component {
 
                         data.push({
                             data: childData,
-                            props: filterPropsFrom(reactableDescendant.props),
+                            props: filterPropsFrom(child.props),
                             __reactableMeta: true
                         });
                     break;
 
                     default:
-                        console.warn ('The only possible children of <Table> are <Thead>, <Tr>, ' +
-                                      'or one <Tfoot>.');
+                        // Don't know if there are other acceptable types
+                        // that should be dismissed
+                        // console.log("Table, got custom component", child.type)
+                        customComponentsCount++;
+                        break;
                 }
             }.bind(this));
         }
 
-        return { data, tfoot };
+        return { data, tfoot, customComponentsCount };
     }
 
     initialize(props) {
         this.data = props.data || [];
-        let { data, tfoot } = this.parseChildData(props);
+        let { data, tfoot, customComponentsCount } = this.parseChildData(props);
 
         this.data = this.data.concat(data);
         this.tfoot = tfoot;
+        this.customComponentsCount = customComponentsCount;
 
         this.initializeSorts(props);
         this.initializeFilters(props);
@@ -259,6 +254,26 @@ export class Table extends React.Component {
         this.filterBy(this.props.filterBy);
     }
 
+    componentDidMount() {
+        for (var i = 0; i < this.customComponentsCount; i++) {
+            let child = this.refs['child-'+i],
+                childData = child.getData(),
+                childDataToPush = {};
+            for (var key in childData){
+                childDataToPush[key] = {
+                    value: childData[key],
+                    __reactableMeta: true
+                };
+            }
+            this.data.push({
+                data: childDataToPush,
+                props: filterPropsFrom(child.props),
+                __reactableMeta: true
+            });
+        };
+        this.setState({parsedCustomComponents: true});
+    }
+
     componentWillReceiveProps(nextProps) {
         this.initialize(nextProps);
         this.updateCurrentPage(nextProps.currentPage)
@@ -362,8 +377,20 @@ export class Table extends React.Component {
             this.props.onSort(currentSort);
         }
     }
+    renderUnparsedDataTable() {
+        // http://www.mattzabriskie.com/blog/react-referencing-dynamic-children
+        let index = 0;
+        let children = React.Children.map(this.props.children, function (child) {
+          return React.addons.cloneWithProps(child, {ref: 'child-' + (index++) });
+        });
 
+        return <div>{children}</div>;
+    }
     render() {
+        if (!this.state.parsedCustomComponents && this.customComponentsCount > 0){
+          return this.renderUnparsedDataTable();
+        }
+
         let children = [];
         let columns;
         let userColumnsSpecified = false;
